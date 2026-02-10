@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { NotFoundError } from 'rxjs';
 
-type TicketState = 'nouveau' | 'en_cours' | 'en_attente' | 'resolu' | 'ferme';
+const allowedStates = ['nouveau', 'en_cours', 'en_attente', 'resolu', 'ferme'] as const;
+type TicketState = typeof allowedStates[number];
 
 type Ticket = {
     id: string;
@@ -61,6 +61,18 @@ export class TicketsService {
             throw new NotFoundException('Ticket not found');
         }
 
+        return ticket;
+    }
+
+    setState(id: string, state: string): Ticket {
+        const ticket = this.getById(id);
+
+        // Validation minimale
+        if (!allowedStates.includes(state as TicketState)) {
+            throw new BadRequestException('Invalid state');
+        }
+
+        ticket.state = state as TicketState;
         return ticket;
     }
 }
