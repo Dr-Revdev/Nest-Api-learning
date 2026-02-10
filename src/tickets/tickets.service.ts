@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { NotFoundError } from 'rxjs';
 
 type TicketState = 'nouveau' | 'en_cours' | 'en_attente' | 'resolu' | 'ferme';
 
@@ -51,5 +52,15 @@ export class TicketsService {
 
         this.tickets.push(newTicket);
         return newTicket;
+    }
+
+    getById(id: string): Ticket {
+        const ticket = this.tickets.find(t => t.id === id);
+
+        if (!ticket) {
+            throw new NotFoundException('Ticket not found');
+        }
+
+        return ticket;
     }
 }
