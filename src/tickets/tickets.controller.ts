@@ -1,5 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
+import { CreateTicketDto } from './dto/create-ticket.dto';
+import { UpdateTicketStateDto } from './dto/update-ticket-state.dto';
 
 @Controller('tickets')
 export class TicketsController {
@@ -16,12 +18,17 @@ export class TicketsController {
     }
 
     @Post()
-    create(@Body('title') title: string) {
-        return this.ticketsService.create(title);
+    create(@Body() dto: CreateTicketDto) {
+        return this.ticketsService.create(dto.title);
     }
 
     @Patch(':id/state')
-    setState(@Param('id') id: string, @Body('state') state: string) {
-        return this.ticketsService.setState(id, state);
+    setState(@Param('id') id: string, @Body() dto: UpdateTicketStateDto) {
+        return this.ticketsService.setState(id, dto.state);
+    }
+
+    @Patch(':id/archive')
+    archive(@Param('id') id: string) {
+        return this.ticketsService.archivedAt(id);
     }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 
 const allowedStates = ['nouveau', 'en_cours', 'en_attente', 'resolu', 'ferme'] as const;
 type TicketState = typeof allowedStates[number];
@@ -37,10 +37,6 @@ export class TicketsService {
     }
 
     create(title: string): Ticket {
-        // Validation minimale
-        if (typeof title !== 'string' || title.trim().length === 0) {
-            throw new BadRequestException('title is required');
-        }
 
         const newTicket: Ticket = {
             id: `T${this.tickets.length + 1}`,
@@ -64,15 +60,21 @@ export class TicketsService {
         return ticket;
     }
 
-    setState(id: string, state: string): Ticket {
+    setState(id: string, state: TicketState): Ticket {
         const ticket = this.getById(id);
 
-        // Validation minimale
-        if (!allowedStates.includes(state as TicketState)) {
-            throw new BadRequestException('Invalid state');
+        ticket.state = state;
+        return ticket;
+    }
+
+    archivedAt(id: string): Ticket {
+        const ticket = this.getById(id);
+
+        if (ticket.archivedAt !== null) {
+            throw new ConflictException('Ticket already archived');
         }
 
-        ticket.state = state as TicketState;
+        ticket.archivedAt = new Date().toISOString();
         return ticket;
     }
 }
